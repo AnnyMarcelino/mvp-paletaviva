@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paleta Viva — Transforme fotos em paletas artísticas</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f0f0f;
+      color: #f5f5f5;
+      line-height: 1.6;
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 50%, #1c1218 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(255, 107, 107, 0.15) 0%, transparent 70%);
+      top: -200px;
+      right: -200px;
+      border-radius: 50%;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.8rem, 8vw, 5rem);
+      font-weight: 800;
+      letter-spacing: -2px;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      max-width: 560px;
+      color: #b0b0b0;
+      margin-bottom: 2.5rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 1rem 2.5rem;
+      background: linear-gradient(90deg, #ff6b6b, #feca57);
+      color: #111;
+      font-weight: 700;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+    }
+
+    /* Seções */
+    section {
+      padding: 5rem 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      font-size: 2.2rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #999;
+      margin-bottom: 3rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Como funciona */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+
+    .step {
+      background: #1a1a1a;
+      padding: 2rem;
+      border-radius: 16px;
+      border: 1px solid #2a2a2a;
+      text-align: center;
+    }
+
+    .step-number {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #ff6b6b, #feca57);
+      color: #111;
+      font-weight: 800;
+      font-size: 1.3rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.2rem;
+    }
+
+    .step h3 {
+      margin-bottom: 0.6rem;
+      font-size: 1.2rem;
+    }
+
+    .step p {
+      color: #aaa;
+      font-size: 0.95rem;
+    }
+
+    /* Demo interativa */
+    .demo {
+      background: #141414;
+      border-radius: 20px;
+      padding: 2.5rem;
+      border: 1px solid #2a2a2a;
+    }
+
+    .upload-area {
+      border: 2px dashed #444;
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.3s, background 0.3s;
+      margin-bottom: 2rem;
+    }
+
+    .upload-area:hover,
+    .upload-area.dragover {
+      border-color: #ff6b6b;
+      background: rgba(255, 107, 107, 0.05);
+    }
+
+    .upload-area p {
+      color: #888;
+      margin-top: 0.8rem;
+    }
+
+    #preview {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 12px;
+      display: none;
+      margin: 0 auto 1.5rem;
+    }
+
+    .palette-result {
+      display: none;
+    }
+
+    .palette-colors {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 1.5rem 0;
+    }
+
+    .color-swatch {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .color-swatch:hover {
+      transform: scale(1.08);
+    }
+
+    .color-swatch span {
+      position: absolute;
+      bottom: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      color: #ccc;
+      white-space: nowrap;
+    }
+
+    .theory {
+      background: #1a1a1a;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-top: 2rem;
+      border-left: 4px solid #feca57;
+    }
+
+    .theory h4 {
+      margin-bottom: 0.5rem;
+      color: #feca57;
+    }
+
+    /* Benefícios */
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .benefit {
+      background: #1a1a1a;
+      padding: 1.8rem;
+      border-radius: 14px;
+      border: 1px solid #2a2a2a;
+    }
+
+    .benefit h3 {
+      margin-bottom: 0.6rem;
+      font-size: 1.15rem;
+    }
+
+    .benefit p {
+      color: #aaa;
+      font-size: 0.95rem;
+    }
+
+    /* CTA final */
+    .cta {
+      text-align: center;
+      padding: 5rem 1.5rem;
+      background: linear-gradient(180deg, #0f0f0f, #1a1218);
+    }
+
+    .cta h2 {
+      margin-bottom: 1rem;
+    }
+
+    .cta p {
+      color: #aaa;
+      margin-bottom: 2rem;
+    }
+
+    .email-form {
+      display: flex;
+      gap: 10px;
+      max-width: 420px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .email-form input {
+      flex: 1;
+      min-width: 220px;
+      padding: 1rem 1.2rem;
+      border-radius: 50px;
+      border: 1px solid #333;
+      background: #1a1a1a;
+      color: white;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .email-form input:focus {
+      border-color: #ff6b6b;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #555;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      .hero h1 {
+        font-size: 2.6rem;
+      }
+      .email-form {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1>Paleta Viva</h1>
+    <p>Tire uma foto de qualquer coisa e transforme em uma paleta de cores harmônica, com explicação de teoria das cores feita para artistas.</p>
+    <a href="#demo" class="btn">Experimentar agora</a>
+  </section>
+
+  <!-- Como funciona -->
+  <section>
+    <h2>Como funciona</h2>
+    <p class="subtitle">Simples, rápido e feito para quem cria.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Capture ou envie</h3>
+        <p>Fotografe uma rua, um pôr do sol, uma roupa ou qualquer cena que te inspire.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Extração inteligente</h3>
+        <p>A Paleta Viva identifica as cores dominantes e cria variações harmônicas automaticamente.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <h3>Teoria explicada</h3>
+        <p>Receba a explicação da harmonia em linguagem de artista — sem termos técnicos complicados.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Demo interativa -->
+  <section id="demo">
+    <h2>Teste agora</h2>
+    <p class="subtitle">Envie uma imagem e veja a mágica acontecer (versão demonstração).</p>
+    
+    <div class="demo">
+      <div class="upload-area" id="uploadArea">
+        <p style="font-size: 2.5rem;">📷</p>
+        <p><strong>Clique ou arraste uma imagem aqui</strong></p>
+        <p>JPG, PNG ou WEBP</p>
+        <input type="file" id="fileInput" accept="image/*" hidden>
+      </div>
+
+      <img id="preview" alt="Pré-visualização">
+
+      <div class="palette-result" id="paletteResult">
+        <h3 style="text-align: center; margin-bottom: 0.5rem;">Sua paleta viva</h3>
+        <div class="palette-colors" id="paletteColors"></div>
+        
+        <div class="theory" id="theoryBox">
+          <h4>Harmonia encontrada</h4>
+          <p id="theoryText"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefícios -->
+  <section>
+    <h2>Por que artistas vão amar</h2>
+    <div class="benefits">
+      <div class="benefit">
+        <h3>🎨 Feito para criadores</h3>
+        <p>Linguagem visual e explicações pensadas para designers, ilustradores e artistas — não para programadores.</p>
+      </div>
+      <div class="benefit">
+        <h3>⚡ Rápido e intuitivo</h3>
+        <p>Do clique à paleta pronta em segundos. Sem configurações complexas.</p>
+      </div>
+      <div class="benefit">
+        <h3>📚 Aprenda enquanto cria</h3>
+        <p>Cada paleta vem com uma pequena lição de teoria das cores, ajudando você a evoluir.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <h2>Quer ser um dos primeiros a usar?</h2>
+    <p>Estamos lançando em breve. Entre na lista de espera e receba acesso antecipado.</p>
+    <form class="email-form" onsubmit="event.preventDefault(); alert('Obrigado! Você entrou na lista de espera da Paleta Viva ✨');">
+      <input type="email" placeholder="Seu melhor e-mail" required>
+      <button type="submit" class="btn">Quero acesso antecipado</button>
+    </form>
+  </section>
+
+  <footer>
+    Paleta Viva © 2026 — Feito para artistas
+  </footer>
+
+  <script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const paletteResult = document.getElementById('paletteResult');
+    const paletteColors = document.getElementById('paletteColors');
+    const theoryText = document.getElementById('theoryText');
+
+    // Clique e drag & drop
+    uploadArea.addEventListener('click', () => fileInput.click());
+    
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      if (e.dataTransfer.files.length) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Por favor, envie uma imagem.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        extractColors(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Extração simples de cores dominantes
+    function extractColors(src) {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Reduz tamanho para performance
+        const maxSize = 100;
+        const scale = Math.min(maxSize / img.width, maxSize / img.height);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+        // Conta cores simplificadas
+        const colorMap = {};
+        for (let i = 0; i < imageData.length; i += 16) { // pula alguns pixels
+          const r = Math.round(imageData[i] / 32) * 32;
+          const g = Math.round(imageData[i + 1] / 32) * 32;
+          const b = Math.round(imageData[i + 2] / 32) * 32;
+          const key = `${r},${g},${b}`;
+          colorMap[key] = (colorMap[key] || 0) + 1;
+        }
+
+        // Pega as 5 cores mais frequentes
+        const sorted = Object.entries(colorMap)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([key]) => {
+            const [r, g, b] = key.split(',').map(Number);
+            return { r, g, b, hex: rgbToHex(r, g, b) };
+          });
+
+        showPalette(sorted);
+      };
+      img.src = src;
+    }
+
+    function rgbToHex(r, g, b) {
+      return '#' + [r, g, b].map(x => {
+        const hex = x.toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+      }).join('');
+    }
+
+    function showPalette(colors) {
+      paletteColors.innerHTML = '';
+      colors.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'color-swatch';
+        div.style.background = c.hex;
+        div.innerHTML = `<span>${c.hex}</span>`;
+        div.title = 'Clique para copiar';
+        div.onclick = () => {
+          navigator.clipboard.writeText(c.hex);
+          alert(`Cor ${c.hex} copiada!`);
+        };
+        paletteColors.appendChild(div);
+      });
+
+      // Texto de teoria (simulado de forma artística)
+      const theories = [
+        "Essa combinação cria uma harmonia análoga — cores vizinhas no círculo cromático. Transmite tranquilidade e coesão visual.",
+        "Você encontrou uma harmonia complementar. O contraste entre essas cores gera energia e impacto visual forte.",
+        "Paleta monocromática com variações de saturação. Ideal para trabalhos elegantes e sofisticados.",
+        "Harmonia triádica detectada. Três cores equilibradas que trazem vivacidade sem perder a unidade.",
+        "Essa paleta tem uma base quente com toques frios. Perfeita para criar profundidade e emoção na composição."
+      ];
+      
+      theoryText.textContent = theories[Math.floor(Math.random() * theories.length)];
+      paletteResult.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
